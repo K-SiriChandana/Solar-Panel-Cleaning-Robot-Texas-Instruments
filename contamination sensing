@@ -1,0 +1,39 @@
+//ratio will need to b e changed as per our own calibration!
+#define AMBIENT_PIN  A0
+#define SURFACE_PIN  A1
+
+#define AMBIENT_MIN  600    // below this = too dark, skip
+#define RATIO_CLEAN  0.20f
+#define RATIO_DRY    0.60f
+#define RATIO_WET    0.85f
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Ambient | Surface | Ratio  | Decision");
+}
+
+void loop() {
+  int ambient = 1023 - analogRead(AMBIENT_PIN);
+  int surface = 1023 - analogRead(SURFACE_PIN);
+
+  if (ambient < AMBIENT_MIN) {
+    Serial.println("LOW LIGHT — skip");
+    delay(1000);
+    return;
+  }
+
+  float ratio = (float)surface / (float)ambient;
+
+  String decision;
+  if      (ratio < RATIO_CLEAN) decision = "CLEAN";
+  else if (ratio < RATIO_DRY)   decision = "DRY CLEAN";
+  else if (ratio < RATIO_WET)   decision = "WET CLEAN";
+  else                           decision = "HEAVY CONTAMINATION";
+
+  Serial.print(ambient);    Serial.print("  | ");
+  Serial.print(surface);    Serial.print("  | ");
+  Serial.print(ratio, 3);   Serial.print("  | ");
+  Serial.println(decision);
+
+  delay(1000);
+}
