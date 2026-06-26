@@ -1,0 +1,49 @@
+
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+
+// ——— PIN DEFINITIONS ———
+#define LDR_PIN A0          // LDR on analog pin
+
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+
+void setup() {
+  Serial.begin(9600);
+
+  // start MLX
+  if (!mlx.begin()) {
+    Serial.println("MLX90614 not found!!");
+    while (1);
+  }
+
+  Serial.println("Temp(C) | Ambient(C) | TempDiff | LDR_Raw | LDR_Ratio");
+}
+
+void loop() {
+
+  // ——— MLX READINGS ———
+  float objectTemp  = mlx.getObjectTempC();   // panel surface temp
+  float ambientTemp = mlx.getAmbientTempC();  // air temp around sensor
+
+  // difference between panel and ambient air
+  // this is your RELATIVE measure — weather independent!!
+  float tempDiff = objectTemp - ambientTemp;
+
+  // ——— LDR READINGS ———
+  // same trick as Sriya — ratio instead of raw!!
+  // but here we use ambient light vs surface reflected light
+  int ldrRaw = analogRead(LDR_PIN);
+
+  // ratio against max possible (1023)
+  // tells us what % of max light is being reflected
+  float ldrRatio = (float)ldrRaw / 1023.0;
+
+  // ——— PRINT ALL VALUES ———
+  Serial.print(objectTemp);   Serial.print("  |  ");
+  Serial.print(ambientTemp);  Serial.print("  |  ");
+  Serial.print(tempDiff);     Serial.print("  |  ");
+  Serial.print(ldrRaw);       Serial.print("  |  ");
+  Serial.println(ldrRatio, 3);
+
+  delay(1000);
+}
