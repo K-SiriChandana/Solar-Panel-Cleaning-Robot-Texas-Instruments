@@ -1,0 +1,61 @@
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+
+#define LDR_PIN A0
+
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+
+// ——— THRESHOLDS (set after running calibration!!) ———
+const float HOTSPOT_DIFF   = 15.0;  // °C above ambient = cell damage
+const float COOLSPOT_DIFF  = -5.0;  // °C below ambient = NOT used (weather issue we discussed!!)
+const float LDR_DIRTY_RATIO = 0.60; // ratio drops below this = dirty
+
+void setup() {
+  Serial.begin(9600);
+
+  if (!mlx.begin()) {
+    Serial.println("MLX90614 not found!!");
+    while (1);
+  }
+
+  Serial.println("System Ready — Thermal + LDR Sensing");
+  Serial.println("ObjTemp | AmbTemp | TempDiff | LDRRatio | STATUS");
+}
+
+void loop() {
+
+  // ——— READ SENSORS ———
+  float objectTemp  = mlx.getObjectTempC();
+  float ambientTemp = mlx.getAmbientTempC();
+  float tempDiff    = objectTemp - ambientTemp;
+  int   ldrRaw      = analogRead(LDR_PIN);
+  float ldrRatio    = (float)ldrRaw / 1023.0;
+
+  // ——— PRINT READINGS ———
+  Serial.print(objectTemp);   Serial.print("  |  ");
+  Serial.print(ambientTemp);  Serial.print("  |  ");
+  Serial.print(tempDiff);     Serial.print("  |  ");
+  Serial.print(ldrRatio, 3);  Serial.print("  |  ");
+
+  // ——— DECISION LOGIC ———
+
+  // CHECK 1: LDR says dirty?
+  if (ldrRatio < LDR_DIRTY_RATIO) {
+    Serial.println("DIRTY — LDR triggered → Signal cleaning!!");
+    // send signal to cleaning system here
+  }
+
+  // CHECK 2: MLX says hotspot? (cell damage)
+  // using tempDiff so weather doesn't affect it!!
+  else if (tempDiff > HOTSPOT_DIFF) {
+    Serial.println("HOTSPOT DETECTED — Cell damage!! Send alert!!");
+    // send WiFi alert here
+  }
+
+  // CHECK 3: All normal
+  else {
+    Serial.println("NORMAL — Panel healthy");
+  }
+
+  delay(1000);
+}
