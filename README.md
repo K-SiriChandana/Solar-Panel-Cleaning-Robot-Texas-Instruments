@@ -187,38 +187,7 @@ Navigation   Cleaning      Fault Detection
 DC Motors   Brush Motor     Water Pump
 ```
 
----
 
-# Project Structure
-
-```text
-Solar-Panel-Cleaning-Robot/
-│
-├── README.md
-│
-├── docs/
-│   ├── Design.pdf
-│   ├── Flowcharts/
-│   └── Images/
-│
-├── firmware/
-│   ├── navigation/
-│   ├── edge_detection/
-│   ├── sensors/
-│   ├── motor_control/
-│   ├── cleaning/
-│   ├── fault_detection/
-│   └── utilities/
-│
-├── hardware/
-│   ├── schematics/
-│   ├── pcb/
-│   └── components/
-│
-└── images/
-```
-
----
 
 # Design Goals
 
